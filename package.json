@@ -2,7 +2,13 @@
   "name": "studyai",
   "version": "1.0.0",
   "description": "AI-Powered Education Platform",
+  "type": "module",
   "scripts": {
-    "build": "echo 'Build completed successfully - static site ready'"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^7.2.2"
   }
 }
