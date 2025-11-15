@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Demo Accounts - StudyAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-teal-50 to-blue-50 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-2xl w-full bg-white rounded-2xl shadow-xl p-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Create Demo Accounts</h1>
+        <p class="text-gray-600 mb-6">Click the buttons below to automatically create working demo accounts</p>
+
+        <div id="instructions" class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+            <p class="text-blue-900 font-semibold mb-2">📋 Instructions:</p>
+            <ol class="text-blue-800 text-sm space-y-1 list-decimal list-inside">
+                <li>Click "Create Student Account" button</li>
+                <li>Wait for confirmation</li>
+                <li>Click "Create Admin Account" button</li>
+                <li>Wait for confirmation</li>
+                <li>Go to login page and use the credentials below</li>
+            </ol>
+        </div>
+
+        <div class="space-y-4 mb-6">
+            <div>
+                <button id="createStudentBtn" class="w-full bg-teal-600 text-white py-4 rounded-lg font-semibold hover:bg-teal-700 transition-colors text-lg flex items-center justify-center gap-2">
+                    <span id="studentSpinner" class="hidden">
+                        <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
+                    <span id="studentBtnText">1. Create Student Account</span>
+                </button>
+                <div id="studentStatus" class="hidden mt-2 p-3 rounded-lg"></div>
+            </div>
+
+            <div>
+                <button id="createAdminBtn" class="w-full bg-blue-600 text-white py-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-lg flex items-center justify-center gap-2">
+                    <span id="adminSpinner" class="hidden">
+                        <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </span>
+                    <span id="adminBtnText">2. Create Admin Account</span>
+                </button>
+                <div id="adminStatus" class="hidden mt-2 p-3 rounded-lg"></div>
+            </div>
+        </div>
+
+        <div id="credentials" class="hidden mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded">
+            <p class="text-green-900 font-semibold mb-3">✓ Accounts Created Successfully!</p>
+            <div class="space-y-2">
+                <div class="p-3 bg-white rounded-lg">
+                    <p class="font-semibold text-gray-800">Student Account:</p>
+                    <p class="text-gray-600 font-mono text-sm">student@demo.com / demo123456</p>
+                </div>
+                <div class="p-3 bg-white rounded-lg">
+                    <p class="font-semibold text-gray-800">Admin Account:</p>
+                    <p class="text-gray-600 font-mono text-sm">admin@demo.com / admin123456</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorBox" class="hidden mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded">
+            <p class="text-red-900 font-semibold mb-2">⚠️ Error Creating Accounts</p>
+            <p id="errorMessage" class="text-red-800 text-sm"></p>
+            <div class="mt-3 p-3 bg-white rounded text-sm">
+                <p class="font-semibold mb-2">Common Issues:</p>
+                <ul class="list-disc list-inside space-y-1 text-gray-700">
+                    <li>Email confirmation is enabled in Supabase</li>
+                    <li>Accounts already exist</li>
+                    <li>Network/connection issues</li>
+                </ul>
+                <p class="mt-2 text-blue-600 font-semibold">Try using the signup form on the login page instead!</p>
+            </div>
+        </div>
+
+        <div class="flex gap-4">
+            <a href="login.html" class="flex-1 text-center px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors">
+                Go to Login
+            </a>
+            <a href="index.html" class="flex-1 text-center px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                Back to Home
+            </a>
+        </div>
+    </div>
+
+    <script type="module">
+        import { supabase } from './auth.js';
+
+        let studentCreated = false;
+        let adminCreated = false;
+
+        async function createAccount(email, password, fullName, role, statusEl, spinnerEl, btnTextEl, btn) {
+            try {
+                spinnerEl.classList.remove('hidden');
+                btn.disabled = true;
+                btn.classList.add('opacity-50');
+                btnTextEl.textContent = 'Creating...';
+
+                // Try to sign up
+                const { data: authData, error: authError } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            full_name: fullName,
+                            role: role
+                        }
+                    }
+                });
+
+                if (authError) {
+                    // Check if user already exists
+                    if (authError.message.includes('already registered')) {
+                        statusEl.className = 'mt-2 p-3 rounded-lg bg-yellow-50 text-yellow-800 text-sm';
+                        statusEl.textContent = `✓ Account already exists! You can login with: ${email}`;
+                        statusEl.classList.remove('hidden');
+                        return true;
+                    }
+                    throw authError;
+                }
+
+                if (authData.user) {
+                    // Create profile
+                    const { error: profileError } = await supabase
+                        .from('user_profiles')
+                        .insert({
+                            id: authData.user.id,
+                            email: email,
+                            full_name: fullName,
+                            role: role,
+                            has_completed_survey: false
+                        });
+
+                    if (profileError && !profileError.message.includes('duplicate')) {
+                        throw profileError;
+                    }
+
+                    // If student, add sample data
+                    if (role === 'student') {
+                        await supabase.from('student_surveys').insert({
+                            user_id: authData.user.id,
+                            exam_type: 'neet',
+                            target_date: '2025-05-15',
+                            study_hours_per_day: 6,
+                            weak_subjects: ['physics', 'chemistry'],
+                            strong_subjects: ['biology'],
+                            learning_style: 'visual'
+                        }).then(() => {
+                            // Update profile to mark survey as complete
+                            return supabase
+                                .from('user_profiles')
+                                .update({ has_completed_survey: true })
+                                .eq('id', authData.user.id);
+                        });
+                    }
+
+                    statusEl.className = 'mt-2 p-3 rounded-lg bg-green-50 text-green-800 text-sm';
+                    statusEl.textContent = `✓ ${role.charAt(0).toUpperCase() + role.slice(1)} account created successfully!`;
+                    statusEl.classList.remove('hidden');
+
+                    btnTextEl.textContent = '✓ Created';
+                    btn.classList.remove('opacity-50');
+                    btn.classList.add('bg-green-600');
+
+                    return true;
+                }
+
+                throw new Error('User creation failed');
+
+            } catch (error) {
+                console.error('Error:', error);
+                statusEl.className = 'mt-2 p-3 rounded-lg bg-red-50 text-red-800 text-sm';
+                statusEl.textContent = `✗ Error: ${error.message}`;
+                statusEl.classList.remove('hidden');
+
+                document.getElementById('errorBox').classList.remove('hidden');
+                document.getElementById('errorMessage').textContent = error.message;
+
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+                btnTextEl.textContent = 'Try Again';
+
+                return false;
+            } finally {
+                spinnerEl.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('createStudentBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('createStudentBtn');
+            const spinner = document.getElementById('studentSpinner');
+            const btnText = document.getElementById('studentBtnText');
+            const status = document.getElementById('studentStatus');
+
+            studentCreated = await createAccount(
+                'student@demo.com',
+                'demo123456',
+                'Demo Student',
+                'student',
+                status,
+                spinner,
+                btnText,
+                btn
+            );
+
+            if (studentCreated && adminCreated) {
+                document.getElementById('credentials').classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('createAdminBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('createAdminBtn');
+            const spinner = document.getElementById('adminSpinner');
+            const btnText = document.getElementById('adminBtnText');
+            const status = document.getElementById('adminStatus');
+
+            adminCreated = await createAccount(
+                'admin@demo.com',
+                'admin123456',
+                'Demo Admin',
+                'admin',
+                status,
+                spinner,
+                btnText,
+                btn
+            );
+
+            if (studentCreated && adminCreated) {
+                document.getElementById('credentials').classList.remove('hidden');
+            }
+        });
+
+        // Check if accounts already exist
+        async function checkExisting() {
+            const { data: profiles } = await supabase
+                .from('user_profiles')
+                .select('email, role')
+                .in('email', ['student@demo.com', 'admin@demo.com']);
+
+            if (profiles && profiles.length > 0) {
+                const message = document.createElement('div');
+                message.className = 'mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded';
+                message.innerHTML = `
+                    <p class="text-yellow-900 font-semibold mb-2">ℹ️ Found Existing Accounts</p>
+                    <p class="text-yellow-800 text-sm mb-2">These accounts already exist:</p>
+                    <ul class="text-yellow-800 text-sm list-disc list-inside">
+                        ${profiles.map(p => `<li>${p.email} (${p.role})</li>`).join('')}
+                    </ul>
+                    <p class="text-yellow-800 text-sm mt-2">You can login directly or create new ones if passwords don't work.</p>
+                `;
+                document.getElementById('instructions').after(message);
+            }
+        }
+
+        checkExisting();
+    </script>
+</body>
+</html>

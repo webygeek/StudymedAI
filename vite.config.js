@@ -25,6 +25,7 @@ export default defineConfig({
         examNotes: resolve(__dirname, 'exam-notes-condensor.html'),
         audioNotes: resolve(__dirname, 'audio-to-notes.html'),
         setupDemo: resolve(__dirname, 'setup-demo.html'),
+        createDemo: resolve(__dirname, 'create-demo-accounts.html'),
       }
     }
   }
