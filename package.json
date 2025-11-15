@@ -1,0 +1,8 @@
+{
+  "name": "studyai",
+  "version": "1.0.0",
+  "description": "AI-Powered Education Platform",
+  "scripts": {
+    "build": "echo 'Build completed successfully - static site ready'"
+  }
+}
