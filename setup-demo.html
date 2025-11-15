@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Demo Accounts - StudyAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-2xl w-full bg-white rounded-xl shadow-lg p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Setup Demo Accounts</h1>
+
+        <div class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+            <p class="text-blue-900 font-semibold mb-2">Click the button below to create demo accounts:</p>
+            <ul class="text-blue-800 text-sm space-y-1">
+                <li>• Student: student@demo.com / demo123456</li>
+                <li>• Admin: admin@demo.com / admin123456</li>
+            </ul>
+        </div>
+
+        <button id="setupBtn" class="w-full bg-teal-600 text-white py-4 rounded-lg font-semibold hover:bg-teal-700 text-lg mb-4">
+            Create Demo Accounts
+        </button>
+
+        <div id="progress" class="hidden mb-4">
+            <div class="space-y-2">
+                <div id="step1" class="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <div class="spinner hidden mr-3"></div>
+                    <span class="text-gray-600">Creating student account...</span>
+                </div>
+                <div id="step2" class="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <div class="spinner hidden mr-3"></div>
+                    <span class="text-gray-600">Creating admin account...</span>
+                </div>
+                <div id="step3" class="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <div class="spinner hidden mr-3"></div>
+                    <span class="text-gray-600">Adding sample data...</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="success" class="hidden p-4 bg-green-50 border-l-4 border-green-500 rounded mb-4">
+            <p class="text-green-900 font-semibold mb-2">✓ Demo accounts created successfully!</p>
+            <div class="text-green-800 text-sm space-y-2 mt-3">
+                <div class="p-3 bg-white rounded">
+                    <p class="font-semibold">Student Account:</p>
+                    <p>Email: student@demo.com</p>
+                    <p>Password: demo123456</p>
+                </div>
+                <div class="p-3 bg-white rounded">
+                    <p class="font-semibold">Admin Account:</p>
+                    <p>Email: admin@demo.com</p>
+                    <p>Password: admin123456</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="error" class="hidden p-4 bg-red-50 border-l-4 border-red-500 rounded mb-4">
+            <p class="text-red-900 font-semibold mb-2">Error creating accounts</p>
+            <p id="errorMessage" class="text-red-800 text-sm"></p>
+        </div>
+
+        <a href="login.html" class="block w-full bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 text-center">
+            Go to Login
+        </a>
+
+        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+            <p class="text-sm text-gray-600 font-semibold mb-2">Note:</p>
+            <p class="text-sm text-gray-600">If accounts already exist, you can login directly with the credentials above.</p>
+        </div>
+    </div>
+
+    <style>
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #0D7377;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <script type="module">
+        import { supabase } from './auth.js';
+
+        document.getElementById('setupBtn').addEventListener('click', async () => {
+            const progressDiv = document.getElementById('progress');
+            const successDiv = document.getElementById('success');
+            const errorDiv = document.getElementById('error');
+            const setupBtn = document.getElementById('setupBtn');
+
+            progressDiv.classList.remove('hidden');
+            successDiv.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            setupBtn.disabled = true;
+            setupBtn.classList.add('opacity-50');
+
+            try {
+                // Step 1: Create student account
+                document.querySelector('#step1 .spinner').classList.remove('hidden');
+
+                const studentResult = await supabase.auth.signUp({
+                    email: 'student@demo.com',
+                    password: 'demo123456',
+                });
+
+                if (studentResult.error && !studentResult.error.message.includes('already registered')) {
+                    throw new Error('Student account: ' + studentResult.error.message);
+                }
+
+                const studentId = studentResult.data.user?.id;
+
+                if (studentId) {
+                    await supabase.from('user_profiles').insert({
+                        id: studentId,
+                        email: 'student@demo.com',
+                        full_name: 'Demo Student',
+                        role: 'student',
+                        has_completed_survey: true
+                    });
+
+                    await supabase.from('student_surveys').insert({
+                        user_id: studentId,
+                        exam_type: 'neet',
+                        target_date: '2025-05-15',
+                        study_hours_per_day: 6,
+                        weak_subjects: ['physics', 'chemistry'],
+                        strong_subjects: ['biology'],
+                        learning_style: 'visual'
+                    });
+                }
+
+                document.querySelector('#step1 .spinner').classList.add('hidden');
+                document.querySelector('#step1 span').innerHTML = '✓ Student account created';
+                document.querySelector('#step1').classList.add('bg-green-50');
+
+                // Step 2: Create admin account
+                document.querySelector('#step2 .spinner').classList.remove('hidden');
+
+                const adminResult = await supabase.auth.signUp({
+                    email: 'admin@demo.com',
+                    password: 'admin123456',
+                });
+
+                if (adminResult.error && !adminResult.error.message.includes('already registered')) {
+                    throw new Error('Admin account: ' + adminResult.error.message);
+                }
+
+                const adminId = adminResult.data.user?.id;
+
+                if (adminId) {
+                    await supabase.from('user_profiles').insert({
+                        id: adminId,
+                        email: 'admin@demo.com',
+                        full_name: 'Demo Admin',
+                        role: 'admin',
+                        has_completed_survey: false
+                    });
+                }
+
+                document.querySelector('#step2 .spinner').classList.add('hidden');
+                document.querySelector('#step2 span').innerHTML = '✓ Admin account created';
+                document.querySelector('#step2').classList.add('bg-green-50');
+
+                // Step 3: Add sample data
+                document.querySelector('#step3 .spinner').classList.remove('hidden');
+
+                if (studentId) {
+                    await supabase.from('study_sessions').insert([
+                        {
+                            user_id: studentId,
+                            subject: 'Physics',
+                            topic: 'Thermodynamics',
+                            duration_minutes: 45,
+                            status: 'completed',
+                            started_at: new Date(Date.now() - 86400000).toISOString(),
+                            completed_at: new Date(Date.now() - 83700000).toISOString()
+                        }
+                    ]);
+
+                    await supabase.from('user_library').insert([
+                        {
+                            user_id: studentId,
+                            item_type: 'flashcard',
+                            title: 'Krebs Cycle',
+                            subject: 'Biology',
+                            content: { question: 'What is the Krebs Cycle?', answer: 'A series of chemical reactions used by aerobic organisms to generate energy' },
+                            tags: ['biochemistry', 'metabolism']
+                        }
+                    ]);
+
+                    await supabase.from('study_schedules').insert([
+                        {
+                            user_id: studentId,
+                            date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+                            subject: 'Chemistry',
+                            topic: 'Organic Reactions',
+                            start_time: '10:00',
+                            end_time: '11:30',
+                            status: 'upcoming'
+                        }
+                    ]);
+                }
+
+                document.querySelector('#step3 .spinner').classList.add('hidden');
+                document.querySelector('#step3 span').innerHTML = '✓ Sample data added';
+                document.querySelector('#step3').classList.add('bg-green-50');
+
+                successDiv.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Setup error:', error);
+                document.getElementById('errorMessage').textContent = error.message;
+                errorDiv.classList.remove('hidden');
+                setupBtn.disabled = false;
+                setupBtn.classList.remove('opacity-50');
+            }
+        });
+    </script>
+</body>
+</html>
