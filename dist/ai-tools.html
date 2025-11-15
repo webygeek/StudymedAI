@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tools - StudyAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css">
+    <style>
+        :root {
+            --primary-teal: #0D7377;
+            --ocean-blue: #14A085;
+            --warm-gray: #2C3E50;
+            --light-gray: #ECF0F1;
+            --success-green: #27AE60;
+            --warning-orange: #F39C12;
+            --error-red: #E74C3C;
+            --info-blue: #3498DB;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .font-display { font-family: 'Poppins', sans-serif; }
+        
+        .hero-bg {
+            background: linear-gradient(135deg, var(--primary-teal) 0%, var(--ocean-blue) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .tool-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--ocean-blue);
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--ocean-blue);
+        }
+        
+        .study-streak {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .ai-loading {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .flashcard {
+            perspective: 1000px;
+            width: 100%;
+            height: 300px;
+        }
+        
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .flashcard-front {
+            background: linear-gradient(135deg, var(--primary-teal), var(--ocean-blue));
+            color: white;
+        }
+        
+        .flashcard-back {
+            background: white;
+            color: var(--warm-gray);
+            transform: rotateY(180deg);
+            border: 2px solid var(--primary-teal);
+        }
+        
+        .mnemonic-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .answer-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .tool-interface {
+            display: none;
+        }
+        
+        .tool-interface.active {
+            display: block;
+        }
+        
+        .progress-step {
+            transition: all 0.3s ease;
+        }
+        
+        .progress-step.active {
+            background: var(--primary-teal);
+            color: white;
+        }
+        
+        .progress-step.completed {
+            background: var(--success-green);
+            color: white;
+        }
+        
+        .typing-animation {
+            border-right: 2px solid var(--primary-teal);
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { border-color: transparent; }
+            51%, 100% { border-color: var(--primary-teal); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-sm fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <div class="font-display font-bold text-2xl text-gray-800">
+                        Study<span class="text-teal-600">AI</span>
+                    </div>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="index.html" class="nav-link text-gray-700 font-medium">Dashboard</a>
+                        <a href="assessment.html" class="nav-link text-gray-700 font-medium">Assessment</a>
+                        <a href="memory-room.html" class="nav-link text-gray-700 font-medium">Memory Room</a>
+                        <a href="ai-tools.html" class="nav-link active text-gray-700 font-medium">AI Tools</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-600">
+                        <span class="study-streak font-semibold">🔥 15 Day Streak</span>
+                    </div>
+                    <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center">
+                        <span class="text-white text-sm font-semibold">A</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <section class="hero-bg pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center text-white">
+                <h1 class="font-display font-bold text-4xl mb-4">AI-Powered Study Tools</h1>
+                <p class="text-xl text-blue-100">Enhance your learning with intelligent study assistants and content generators</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Tool Selection -->
+        <div id="toolSelection" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <!-- Flashcard Generator -->
+            <div class="tool-card bg-white rounded-xl shadow-lg p-6" data-tool="flashcards">
+                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"/>
+                    </svg>
+                </div>
+                <h3 class="font-display font-semibold text-xl text-gray-800 mb-2">AI Flashcard Generator</h3>
+                <p class="text-gray-600 mb-4">Create intelligent flashcards with spaced repetition scheduling</p>
+                <div class="flex items-center text-sm text-gray-500">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    1,247 flashcards created
+                </div>
+            </div>
+
+            <!-- Mnemonics Generator -->
+            <div class="tool-card bg-white rounded-xl shadow-lg p-6" data-tool="mnemonics">
+                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h3 class="font-display font-semibold text-xl text-gray-800 mb-2">Mnemonics Generator</h3>
+                <p class="text-gray-600 mb-4">Generate memorable aids for complex medical and scientific terms</p>
+                <div class="flex items-center text-sm text-gray-500">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    892 mnemonics created
+                </div>
+            </div>
+
+            <!-- Answer Generator -->
+            <div class="tool-card bg-white rounded-xl shadow-lg p-6" data-tool="answers">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v12h8V4H6z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <h3 class="font-display font-semibold text-xl text-gray-800 mb-2">Answer Generator</h3>
+                <p class="text-gray-600 mb-4">Create structured exam answers with proper formatting</p>
+                <div class="flex items-center text-sm text-gray-500">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    3,456 answers generated
+                </div>
+            </div>
+
+            <!-- Clinical Case Simulator -->
+            <div class="tool-card bg-white rounded-xl shadow-lg p-6" data-tool="clinical">
+                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm8 5a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <h3 class="font-display font-semibold text-xl text-gray-800 mb-2">Clinical Case Simulator</h3>
+                <p class="text-gray-600 mb-4">Practice with interactive patient scenarios and cases</p>
+                <div class="flex items-center text-sm text-gray-500">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    234 cases completed
+                </div>
+            </div>
+
+            <!-- Drug Chart Creator -->
+            <div class="tool-card bg-white rounded-xl shadow-lg p-6" data-tool="drugs">
+                <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <h3 class="font-display font-semibold text-xl text-gray-800 mb-2">Drug Chart Creator</h3>
+                <p class="text-gray-600 mb-4">Generate comprehensive drug information tables</p>
+                <div class="flex items-center text-sm text-gray-500">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    567 charts created
+                </div>
+            </div>
+
+            <!-- OSCE Practice -->
+            <div class="tool-card bg-white rounded-xl shadow-lg p-6" data-tool="osce">
+                <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                    </svg>
+                </div>
+                <h3 class="font-display font-semibold text-xl text-gray-800 mb-2">OSCE Practice Partner</h3>
+                <p class="text-gray-600 mb-4">Virtual patient interactions for practical exam preparation</p>
+                <div class="flex items-center text-sm text-gray-500">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    123 sessions completed
+                </div>
+            </div>
+        </div>
+
+        <!-- Tool Interfaces -->
+        <div id="toolInterfaces">
+            <!-- Flashcard Generator Interface -->
+            <div id="flashcards-interface" class="tool-interface bg-white rounded-xl shadow-lg p-8 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-display font-semibold text-2xl text-gray-800">AI Flashcard Generator</h3>
+                    <button class="text-gray-500 hover:text-gray-700" onclick="showToolSelection()">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Progress Steps -->
+                <div class="flex items-center justify-center mb-8">
+                    <div class="flex items-center space-x-4">
+                        <div class="progress-step active w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold">1</div>
+                        <div class="w-12 h-1 bg-gray-200"></div>
+                        <div class="progress-step w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold">2</div>
+                        <div class="w-12 h-1 bg-gray-200"></div>
+                        <div class="progress-step w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-semibold">3</div>
+                    </div>
+                </div>
+
+                <!-- Step 1: Input -->
+                <div id="flashcard-step-1" class="flashcard-step">
+                    <div class="max-w-2xl mx-auto">
+                        <h4 class="font-semibold text-lg text-gray-800 mb-4">What topic would you like to create flashcards for?</h4>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+                                <select id="flashcardSubject" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                    <option value="physics">Physics</option>
+                                    <option value="chemistry">Chemistry</option>
+                                    <option value="mathematics">Mathematics</option>
+                                    <option value="biology">Biology</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Topic</label>
+                                <input type="text" id="flashcardTopic" placeholder="e.g., Newton's Laws of Motion" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Number of Flashcards</label>
+                                <select id="flashcardCount" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                    <option value="5">5 Flashcards</option>
+                                    <option value="10" selected>10 Flashcards</option>
+                                    <option value="15">15 Flashcards</option>
+                                    <option value="20">20 Flashcards</option>
+                                </select>
+                            </div>
+                            <button onclick="generateFlashcards()" class="w-full bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-700 transition-colors">
+                                Generate Flashcards
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Generation -->
+                <div id="flashcard-step-2" class="flashcard-step hidden">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-4 ai-loading">
+                            <svg class="w-8 h-8 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+                            </svg>
+                        </div>
+                        <h4 class="font-semibold text-lg text-gray-800 mb-2">AI is Creating Your Flashcards</h4>
+                        <p class="text-gray-600 mb-4">Generating personalized content based on your topic...</p>
+                        <div class="w-full bg-gray-200 rounded-full h-2 max-w-md mx-auto">
+                            <div class="bg-teal-600 h-2 rounded-full animate-pulse" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Results -->
+                <div id="flashcard-step-3" class="flashcard-step hidden">
+                    <div class="mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-semibold text-lg text-gray-800">Your Flashcards</h4>
+                            <div class="flex space-x-2">
+                                <button onclick="downloadFlashcards()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                                    Download
+                                </button>
+                                <button onclick="saveToLibrary()" class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors">
+                                    Save to Library
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Flashcard Carousel -->
+                        <div class="splide" id="flashcardCarousel">
+                            <div class="splide__track">
+                                <ul class="splide__list" id="flashcardList">
+                                    <!-- Flashcards will be inserted here -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <button onclick="createNewFlashcards()" class="bg-teal-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-teal-700 transition-colors">
+                            Create New Set
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mnemonics Generator Interface -->
+            <div id="mnemonics-interface" class="tool-interface bg-white rounded-xl shadow-lg p-8 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-display font-semibold text-2xl text-gray-800">Mnemonics Generator</h3>
+                    <button class="text-gray-500 hover:text-gray-700" onclick="showToolSelection()">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-w-2xl mx-auto">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Term or Concept</label>
+                            <input type="text" id="mnemonicTerm" placeholder="e.g., Cranial nerves" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Mnemonic Style</label>
+                            <select id="mnemonicStyle" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                <option value="acronym">Acronym</option>
+                                <option value="story">Story-based</option>
+                                <option value="rhyme">Rhyme</option>
+                                <option value="visual">Visual imagery</option>
+                            </select>
+                        </div>
+                        
+                        <button onclick="generateMnemonic()" class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                            Generate Mnemonic
+                        </button>
+                    </div>
+
+                    <div id="mnemonicResult" class="mt-8 hidden">
+                        <div class="mnemonic-card rounded-lg p-6 text-white">
+                            <h4 class="font-semibold text-lg mb-4">Your Mnemonic</h4>
+                            <div id="mnemonicContent" class="text-lg leading-relaxed"></div>
+                        </div>
+                        
+                        <div class="flex space-x-3 mt-4">
+                            <button onclick="regenerateMnemonic()" class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg font-medium hover:bg-opacity-30 transition-colors">
+                                Generate Another
+                            </button>
+                            <button onclick="saveMnemonic()" class="bg-white text-purple-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                                Save to Library
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Answer Generator Interface -->
+            <div id="answers-interface" class="tool-interface bg-white rounded-xl shadow-lg p-8 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-display font-semibold text-2xl text-gray-800">Answer Generator</h3>
+                    <button class="text-gray-500 hover:text-gray-700" onclick="showToolSelection()">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="max-w-4xl mx-auto">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Question/Topic</label>
+                                <textarea id="answerQuestion" rows="4" placeholder="Enter your question or topic here..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500"></textarea>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Answer Type</label>
+                                <select id="answerType" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                    <option value="essay">Essay Format</option>
+                                    <option value="short">Short Answer</option>
+                                    <option value="detailed">Detailed Explanation</option>
+                                    <option value="bullet">Bullet Points</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Word Count</label>
+                                <select id="answerLength" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500">
+                                    <option value="100">~100 words</option>
+                                    <option value="250">~250 words</option>
+                                    <option value="500">~500 words</option>
+                                    <option value="1000">~1000 words</option>
+                                </select>
+                            </div>
+                            
+                            <button onclick="generateAnswer()" class="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                                Generate Answer
+                            </button>
+                        </div>
+                        
+                        <div>
+                            <div id="answerResult" class="hidden">
+                                <div class="answer-card rounded-lg p-6 text-white">
+                                    <h4 class="font-semibold text-lg mb-4">Generated Answer</h4>
+                                    <div id="answerContent" class="text-sm leading-relaxed"></div>
+                                </div>
+                                
+                                <div class="flex space-x-3 mt-4">
+                                    <button onclick="regenerateAnswer()" class="bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg font-medium hover:bg-opacity-30 transition-colors">
+                                        Regenerate
+                                    </button>
+                                    <button onclick="saveAnswer()" class="bg-white text-green-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                                        Save to Library
+                                    </button>
+                                    <button onclick="copyAnswer()" class="bg-white text-green-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors">
+                                        Copy
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div id="answerPlaceholder" class="h-full flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
+                                <div class="text-center text-gray-500">
+                                    <svg class="w-12 h-12 mx-auto mb-4 opacity-50" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v12h8V4H6z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <p>Your generated answer will appear here</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="font-display font-bold text-2xl mb-4">
+                    Study<span class="text-teal-400">AI</span>
+                </div>
+                <p class="text-gray-400 mb-4">
+                    Empowering students with AI-driven personalized learning experiences
+                </p>
+                <div class="text-sm text-gray-500">
+                    © 2025 StudyAI. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // AI Tools JavaScript
+        const AITools = {
+            currentTool: null,
+            flashcards: [],
+            mnemonics: [],
+            answers: []
+        };
+
+        // Initialize AI Tools
+        function initializeAITools() {
+            // Add click listeners to tool cards
+            document.querySelectorAll('.tool-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const tool = card.dataset.tool;
+                    showToolInterface(tool);
+                });
+            });
+
+            // Initial animations
+            anime({
+                targets: '.tool-card',
+                translateY: [30, 0],
+                opacity: [0, 1],
+                duration: 800,
+                delay: anime.stagger(100),
+                easing: 'easeOutCubic'
+            });
+        }
+
+        // Show tool interface
+        function showToolInterface(tool) {
+            // Hide all interfaces
+            document.querySelectorAll('.tool-interface').forEach(iface => {
+                iface.classList.remove('active');
+            });
+
+            // Show selected interface
+            document.getElementById(`${tool}-interface`).classList.add('active');
+            
+            // Hide tool selection
+            document.getElementById('toolSelection').style.display = 'none';
+            
+            AITools.currentTool = tool;
+        }
+
+        // Show tool selection
+        function showToolSelection() {
+            // Hide all interfaces
+            document.querySelectorAll('.tool-interface').forEach(iface => {
+                iface.classList.remove('active');
+            });
+
+            // Show tool selection
+            document.getElementById('toolSelection').style.display = 'grid';
+            
+            AITools.currentTool = null;
+        }
+
+        // Flashcard Generator Functions
+        function generateFlashcards() {
+            const subject = document.getElementById('flashcardSubject').value;
+            const topic = document.getElementById('flashcardTopic').value;
+            const count = parseInt(document.getElementById('flashcardCount').value);
+
+            if (!topic.trim()) {
+                showNotification('Please enter a topic', 'error');
+                return;
+            }
+
+            // Show step 2 (generation)
+            showFlashcardStep(2);
+
+            // Simulate AI generation
+            setTimeout(() => {
+                AITools.flashcards = generateFlashcardContent(subject, topic, count);
+                showFlashcardResults();
+                showFlashcardStep(3);
+                initializeFlashcardCarousel();
+            }, 2000);
+        }
+
+        function generateFlashcardContent(subject, topic, count) {
+            const flashcardData = {
+                physics: {
+                    "newton's laws of motion": [
+                        { front: "What is Newton's First Law?", back: "An object at rest stays at rest, and an object in motion stays in motion at constant velocity unless acted upon by an external force." },
+                        { front: "What is Newton's Second Law?", back: "F = ma. The force acting on an object is equal to its mass times its acceleration." },
+                        { front: "What is Newton's Third Law?", back: "For every action, there is an equal and opposite reaction." },
+                        { front: "What is inertia?", back: "The tendency of an object to resist changes in its state of motion." },
+                        { front: "What is the unit of force?", back: "Newton (N), where 1 N = 1 kg⋅m/s²" }
+                    ]
+                },
+                chemistry: {
+                    "periodic table": [
+                        { front: "What is the atomic number?", back: "The number of protons in the nucleus of an atom." },
+                        { front: "What is a period in the periodic table?", back: "A horizontal row of elements with the same number of electron shells." },
+                        { front: "What is a group in the periodic table?", back: "A vertical column of elements with similar chemical properties." },
+                        { front: "What are alkali metals?", back: "Group 1 elements that are highly reactive and form basic oxides." },
+                        { front: "What are noble gases?", back: "Group 18 elements that are chemically inert due to full electron shells." }
+                    ]
+                },
+                biology: {
+                    "cell structure": [
+                        { front: "What is the cell membrane?", back: "A phospholipid bilayer that controls what enters and leaves the cell." },
+                        { front: "What is the nucleus?", back: "The control center of the cell containing DNA." },
+                        { front: "What are mitochondria?", back: "The powerhouse of the cell, producing ATP through cellular respiration." },
+                        { front: "What is the function of ribosomes?", back: "Protein synthesis - they translate mRNA into proteins." },
+                        { front: "What is the Golgi apparatus?", back: "Modifies, sorts, and packages proteins for secretion or delivery." }
+                    ]
+                },
+                mathematics: {
+                    "basic algebra": [
+                        { front: "What is a variable?", back: "A symbol (usually a letter) that represents an unknown value." },
+                        { front: "What is a linear equation?", back: "An equation where the highest power of the variable is 1 (e.g., 2x + 3 = 7)." },
+                        { front: "What is the distributive property?", back: "a(b + c) = ab + ac. Multiply each term inside parentheses by the factor outside." },
+                        { front: "What is a quadratic equation?", back: "An equation of the form ax² + bx + c = 0, where a ≠ 0." },
+                        { front: "What is the quadratic formula?", back: "x = [-b ± √(b² - 4ac)] / (2a), used to solve quadratic equations." }
+                    ]
+                }
+            };
+
+            const subjectData = flashcardData[subject.toLowerCase()] || flashcardData.physics;
+            const topicKey = topic.toLowerCase();
+            
+            let cards = [];
+            if (subjectData[topicKey]) {
+                cards = [...subjectData[topicKey]];
+            } else {
+                // Generate generic cards for unknown topics
+                for (let i = 0; i < Math.min(count, 5); i++) {
+                    cards.push({
+                        front: `Key concept ${i + 1} about ${topic}`,
+                        back: `Detailed explanation of concept ${i + 1} with examples and applications.`
+                    });
+                }
+            }
+
+            // Ensure we have the requested number of cards
+            while (cards.length < count) {
+                const index = cards.length % 5;
+                cards.push({
+                    front: `Additional concept ${cards.length + 1} about ${topic}`,
+                    back: `Extended explanation covering advanced aspects of the topic.`
+                });
+            }
+
+            return cards.slice(0, count);
+        }
+
+        function showFlashcardStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.flashcard-step').forEach(s => s.classList.add('hidden'));
+            // Show current step
+            document.getElementById(`flashcard-step-${step}`).classList.remove('hidden');
+            
+            // Update progress indicators
+            document.querySelectorAll('.progress-step').forEach((stepEl, index) => {
+                stepEl.classList.remove('active', 'completed');
+                if (index + 1 < step) {
+                    stepEl.classList.add('completed');
+                } else if (index + 1 === step) {
+                    stepEl.classList.add('active');
+                }
+            });
+        }
+
+        function showFlashcardResults() {
+            const flashcardList = document.getElementById('flashcardList');
+            flashcardList.innerHTML = '';
+
+            AITools.flashcards.forEach((card, index) => {
+                const li = document.createElement('li');
+                li.className = 'splide__slide';
+                li.innerHTML = `
+                    <div class="flashcard" onclick="flipCard(this)">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="text-center">
+                                    <div class="text-sm opacity-75 mb-4">Card ${index + 1}</div>
+                                    <div class="text-xl font-semibold">${card.front}</div>
+                                </div>
+                            </div>
+                            <div class="flashcard-back">
+                                <div class="text-center">
+                                    <div class="text-sm text-teal-600 mb-4">Answer</div>
+                                    <div class="text-base leading-relaxed">${card.back}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                flashcardList.appendChild(li);
+            });
+        }
+
+        function initializeFlashcardCarousel() {
+            new Splide('#flashcardCarousel', {
+                type: 'slide',
+                perPage: 1,
+                perMove: 1,
+                gap: '2rem',
+                arrows: true,
+                pagination: true,
+                keyboard: true,
+                breakpoints: {
+                    768: {
+                        perPage: 1,
+                    }
+                }
+            }).mount();
+        }
+
+        function flipCard(card) {
+            card.classList.toggle('flipped');
+        }
+
+        // Mnemonics Generator Functions
+        function generateMnemonic() {
+            const term = document.getElementById('mnemonicTerm').value;
+            const style = document.getElementById('mnemonicStyle').value;
+
+            if (!term.trim()) {
+                showNotification('Please enter a term or concept', 'error');
+                return;
+            }
+
+            // Simulate AI generation
+            const mnemonic = generateMnemonicContent(term, style);
+            
+            document.getElementById('mnemonicContent').innerHTML = mnemonic;
+            document.getElementById('mnemonicResult').classList.remove('hidden');
+            
+            // Add typing animation
+            const content = document.getElementById('mnemonicContent');
+            content.classList.add('typing-animation');
+            
+            setTimeout(() => {
+                content.classList.remove('typing-animation');
+            }, 2000);
+        }
+
+        function generateMnemonicContent(term, style) {
+            const mnemonics = {
+                "cranial nerves": {
+                    acronym: "On Old Olympus' Towering Top, A Finn And German Viewed Some Hops",
+                    story: "Imagine an Old Olympian god standing on a towering mountain top. A Finnish tourist and a German hiker are viewing some hops (beer ingredients) while discussing the cranial nerves.",
+                    rhyme: "To remember cranial nerves, just observe: One Two Three, Four Five Six, Seven Eight Nine, Ten Eleven Twelve - that's how the sequence fixes!",
+                    visual: "Picture a giant brain with 12 colorful pathways extending from it like rainbow-colored highways, each labeled with its function and name."
+                },
+                "periodic table groups": {
+                    acronym: "Happy Little Bears Catch Fish",
+                    story: "A happy little bear goes fishing and catches different types of fish, each representing a different group in the periodic table with unique properties.",
+                    rhyme: "Group One is fun, Group Two is true, Groups Three to Twelve are transition metals for you!",
+                    visual: "Visualize the periodic table as a neighborhood where each group lives in a different colored house with distinct personalities."
+                }
+            };
+
+            const termKey = term.toLowerCase();
+            let mnemonic = "Custom mnemonic for: " + term;
+
+            if (mnemonics[termKey]) {
+                mnemonic = mnemonics[termKey][style] || mnemonics[termKey].acronym;
+            } else {
+                // Generate generic mnemonic
+                switch(style) {
+                    case 'acronym':
+                        mnemonic = `Create an acronym using the first letters of key concepts related to ${term}. For example: "SMART" for Specific, Measurable, Achievable, Relevant, Time-bound.`;
+                        break;
+                    case 'story':
+                        mnemonic = `Create a memorable story that incorporates the key elements of ${term}. Make it visual and emotional for better retention.`;
+                        break;
+                    case 'rhyme':
+                        mnemonic = `Create a simple rhyme or poem that captures the essence of ${term}. Rhymes are easier to remember than plain facts.`;
+                        break;
+                    case 'visual':
+                        mnemonic = `Create a vivid mental image that represents ${term}. The more unusual and detailed the image, the better you'll remember it.`;
+                        break;
+                }
+            }
+
+            return mnemonic;
+        }
+
+        function regenerateMnemonic() {
+            generateMnemonic();
+        }
+
+        // Answer Generator Functions
+        function generateAnswer() {
+            const question = document.getElementById('answerQuestion').value;
+            const type = document.getElementById('answerType').value;
+            const length = document.getElementById('answerLength').value;
+
+            if (!question.trim()) {
+                showNotification('Please enter a question or topic', 'error');
+                return;
+            }
+
+            // Simulate AI generation
+            const answer = generateAnswerContent(question, type, length);
+            
+            document.getElementById('answerContent').innerHTML = answer;
+            document.getElementById('answerResult').classList.remove('hidden');
+            document.getElementById('answerPlaceholder').classList.add('hidden');
+            
+            // Add typing animation
+            const content = document.getElementById('answerContent');
+            content.classList.add('typing-animation');
+            
+            setTimeout(() => {
+                content.classList.remove('typing-animation');
+            }, 3000);
+        }
+
+        function generateAnswerContent(question, type, length) {
+            const sampleAnswers = {
+                essay: `
+                        <h5 class="font-semibold mb-3">${question}</h5>
+                        <p class="mb-4">This question requires a comprehensive analysis of the fundamental principles involved. The key aspects to consider include:</p>
+                        <ol class="list-decimal list-inside space-y-2 mb-4">
+                            <li><strong>Primary Concepts:</strong> The main theoretical framework underlying the topic</li>
+                            <li><strong>Applications:</strong> Practical implementations and real-world examples</li>
+                            <li><strong>Limitations:</strong> Constraints and boundaries of the concept</li>
+                            <li><strong>Future Directions:</strong> Potential developments and research opportunities</li>
+                        </ol>
+                        <p class="mb-4">In conclusion, this topic represents a crucial area of study that bridges theoretical knowledge with practical application. Understanding these concepts is essential for advanced study in the field.</p>
+                        <div class="text-xs opacity-75 mt-4">
+                            <strong>Word Count:</strong> ~${length} words | <strong>Type:</strong> ${type} | <strong>Generated:</strong> Just now
+                        </div>
+                    `,
+                short: `
+                        <h5 class="font-semibold mb-3">${question}</h5>
+                        <p class="mb-3">The answer can be summarized in three key points:</p>
+                        <ul class="list-disc list-inside space-y-1 mb-3">
+                            <li>Core principle and definition</li>
+                            <li>Primary applications and examples</li>
+                            <li>Significance in the broader context</li>
+                        </ul>
+                        <p class="text-sm opacity-75">
+                            <strong>Format:</strong> ${type} answer | <strong>Length:</strong> ~${length} words
+                        </p>
+                    `,
+                detailed: `
+                        <h5 class="font-semibold mb-3">${question}</h5>
+                        <div class="space-y-3">
+                            <p><strong>Introduction:</strong> This topic represents a fundamental concept that requires thorough understanding for mastery in the subject area.</p>
+                            
+                            <p><strong>Theoretical Framework:</strong> The underlying principles can be broken down into several key components that work together to form a cohesive understanding.</p>
+                            
+                            <p><strong>Practical Applications:</strong> Real-world implementations demonstrate the relevance and importance of these concepts in various contexts.</p>
+                            
+                            <p><strong>Case Studies:</strong> Specific examples illustrate how these principles are applied in practice, providing concrete evidence of their utility.</p>
+                            
+                            <p><strong>Conclusion:</strong> Mastery of these concepts provides a solid foundation for advanced study and practical application in the field.</p>
+                        </div>
+                        <div class="text-xs opacity-75 mt-4">
+                            Detailed explanation | ~${length} words | Generated: ${new Date().toLocaleTimeString()}
+                        </div>
+                    `,
+                bullet: `
+                        <h5 class="font-semibold mb-3">${question}</h5>
+                        <ul class="space-y-2">
+                            <li class="flex items-start">
+                                <span class="bg-white bg-opacity-20 text-white px-2 py-1 rounded text-xs mr-2 mt-1">1</span>
+                                <span>Key definition and fundamental principles</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-white bg-opacity-20 text-white px-2 py-1 rounded text-xs mr-2 mt-1">2</span>
+                                <span>Primary applications and use cases</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-white bg-opacity-20 text-white px-2 py-1 rounded text-xs mr-2 mt-1">3</span>
+                                <span>Important formulas or equations</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-white bg-opacity-20 text-white px-2 py-1 rounded text-xs mr-2 mt-1">4</span>
+                                <span>Common misconceptions to avoid</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="bg-white bg-opacity-20 text-white px-2 py-1 rounded text-xs mr-2 mt-1">5</span>
+                                <span>Study tips and memorization techniques</span>
+                            </li>
+                        </ul>
+                        <div class="text-xs opacity-75 mt-4">
+                            Bullet point format | ~${length} words | Easy to remember
+                        </div>
+                    `
+            };
+
+            return sampleAnswers[type] || sampleAnswers.essay;
+        }
+
+        function regenerateAnswer() {
+            generateAnswer();
+        }
+
+        function copyAnswer() {
+            const content = document.getElementById('answerContent').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                showNotification('Answer copied to clipboard!', 'success');
+            });
+        }
+
+        // Library Functions
+        function saveToLibrary() {
+            showNotification('Flashcards saved to your library!', 'success');
+        }
+
+        function saveMnemonic() {
+            showNotification('Mnemonic saved to your library!', 'success');
+        }
+
+        function saveAnswer() {
+            showNotification('Answer saved to your library!', 'success');
+        }
+
+        function downloadFlashcards() {
+            showNotification('Flashcards downloaded as PDF!', 'success');
+        }
+
+        function createNewFlashcards() {
+            showFlashcardStep(1);
+            document.getElementById('flashcardTopic').value = '';
+        }
+
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full`;
+            
+            const colors = {
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                warning: 'bg-yellow-500 text-black',
+                info: 'bg-blue-500 text-white'
+            };
+            
+            notification.className += ` ${colors[type]}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAITools();
+        });
+    </script>
+</body>
+</html>

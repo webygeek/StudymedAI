@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Center - StudyAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-teal: #0D7377;
+            --ocean-blue: #14A085;
+            --warm-gray: #2C3E50;
+            --light-gray: #ECF0F1;
+            --success-green: #27AE60;
+            --warning-orange: #F39C12;
+            --error-red: #E74C3C;
+            --info-blue: #3498DB;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .font-display { font-family: 'Poppins', sans-serif; }
+        
+        .hero-bg {
+            background: linear-gradient(135deg, var(--primary-teal) 0%, var(--ocean-blue) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--ocean-blue);
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--ocean-blue);
+        }
+        
+        .difficulty-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            background: linear-gradient(to right, #27AE60 0%, #F39C12 50%, #E74C3C 100%);
+            outline: none;
+        }
+        
+        .difficulty-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--primary-teal);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .difficulty-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--primary-teal);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        
+        .ai-loading {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .question-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .question-card.active {
+            border-left-color: var(--primary-teal);
+            background: rgba(13, 115, 119, 0.05);
+        }
+        
+        .option-button {
+            transition: all 0.2s ease;
+        }
+        
+        .option-button:hover {
+            background: rgba(13, 115, 119, 0.1);
+            transform: translateX(4px);
+        }
+        
+        .option-button.selected {
+            background: var(--primary-teal);
+            color: white;
+        }
+        
+        .option-button.correct {
+            background: var(--success-green);
+            color: white;
+        }
+        
+        .option-button.incorrect {
+            background: var(--error-red);
+            color: white;
+        }
+        
+        .timer-circle {
+            transform: rotate(-90deg);
+        }
+        
+        .study-streak {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-sm fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <div class="font-display font-bold text-2xl text-gray-800">
+                        Study<span class="text-teal-600">AI</span>
+                    </div>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="index.html" class="nav-link text-gray-700 font-medium">Dashboard</a>
+                        <a href="assessment.html" class="nav-link active text-gray-700 font-medium">Assessment</a>
+                        <a href="memory-room.html" class="nav-link text-gray-700 font-medium">Memory Room</a>
+                        <a href="ai-tools.html" class="nav-link text-gray-700 font-medium">AI Tools</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-600">
+                        <span class="study-streak font-semibold">🔥 15 Day Streak</span>
+                    </div>
+                    <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center">
+                        <span class="text-white text-sm font-semibold">A</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <section class="hero-bg pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center text-white">
+                <h1 class="font-display font-bold text-4xl mb-4">AI-Powered Assessment Center</h1>
+                <p class="text-xl text-blue-100">Generate personalized tests and track your performance with intelligent analytics</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Test Configuration -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-xl shadow-lg p-6 sticky top-24">
+                    <h3 class="font-display font-semibold text-xl text-gray-800 mb-6">Test Configuration</h3>
+                    
+                    <!-- Exam Type -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Exam Type</label>
+                        <select id="examType" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                            <option value="jee-main">JEE Main</option>
+                            <option value="jee-advanced">JEE Advanced</option>
+                            <option value="neet">NEET</option>
+                            <option value="bitsat">BITSAT</option>
+                        </select>
+                    </div>
+
+                    <!-- Subject Selection -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Subjects</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="subject-checkbox text-teal-600" value="physics" checked>
+                                <span class="ml-2 text-gray-700">Physics</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="subject-checkbox text-teal-600" value="chemistry" checked>
+                                <span class="ml-2 text-gray-700">Chemistry</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="subject-checkbox text-teal-600" value="mathematics" checked>
+                                <span class="ml-2 text-gray-700">Mathematics</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="subject-checkbox text-teal-600" value="biology">
+                                <span class="ml-2 text-gray-700">Biology</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Difficulty Level -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Difficulty Level</label>
+                        <input type="range" id="difficulty" min="1" max="3" value="2" class="difficulty-slider w-full">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>Easy</span>
+                            <span>Medium</span>
+                            <span>Hard</span>
+                        </div>
+                    </div>
+
+                    <!-- Question Count -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Question Count</label>
+                        <select id="questionCount" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                            <option value="5">5 Questions</option>
+                            <option value="10" selected>10 Questions</option>
+                            <option value="20">20 Questions</option>
+                            <option value="50">50 Questions</option>
+                        </select>
+                    </div>
+
+                    <!-- Time Limit -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Time Limit</label>
+                        <select id="timeLimit" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                            <option value="none">No Time Limit</option>
+                            <option value="30">30 seconds/question</option>
+                            <option value="60" selected>1 minute/question</option>
+                            <option value="120">2 minutes/question</option>
+                        </select>
+                    </div>
+
+                    <!-- Generate Test Button -->
+                    <button id="generateTestBtn" class="w-full bg-teal-600 text-white p-3 rounded-lg font-semibold hover:bg-teal-700 transition-colors">
+                        Generate AI Test
+                    </button>
+                </div>
+            </div>
+
+            <!-- Test Interface -->
+            <div class="lg:col-span-3">
+                <!-- Test Generation Screen -->
+                <div id="testGeneration" class="bg-white rounded-xl shadow-lg p-8">
+                    <div class="text-center">
+                        <div class="w-24 h-24 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-12 h-12 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h3 class="font-display font-semibold text-2xl text-gray-800 mb-4">Ready to Test Your Knowledge?</h3>
+                        <p class="text-gray-600 mb-8">
+                            Configure your test parameters and let our AI create a personalized assessment 
+                            based on your learning progress and weak areas.
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <svg class="w-8 h-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                                    </svg>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-2">Adaptive Testing</h4>
+                                <p class="text-sm text-gray-600">Questions adapt to your performance level</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-2">Instant Feedback</h4>
+                                <p class="text-sm text-gray-600">Get immediate results and explanations</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2v1a2 2 0 002 2h8a2 2 0 002-2V3a2 2 0 012 2v6a2 2 0 01-2 2H6a2 2 0 01-2-2V5zM8 11a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <h4 class="font-semibold text-gray-800 mb-2">Smart Analytics</h4>
+                                <p class="text-sm text-gray-600">Detailed performance analysis and insights</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Test Interface (Hidden Initially) -->
+                <div id="testInterface" class="hidden">
+                    <!-- Test Header -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="font-display font-semibold text-xl text-gray-800" id="testTitle">AI Generated Test</h3>
+                                <p class="text-gray-600" id="testProgress">Question 1 of 10</p>
+                            </div>
+                            <div class="flex items-center space-x-6">
+                                <!-- Timer -->
+                                <div class="flex items-center space-x-2">
+                                    <svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <span class="font-semibold text-gray-800" id="timer">10:00</span>
+                                </div>
+                                <!-- Progress Circle -->
+                                <div class="relative">
+                                    <svg class="timer-circle w-12 h-12" viewBox="0 0 48 48">
+                                        <circle cx="24" cy="24" r="20" stroke="#e5e7eb" stroke-width="4" fill="none"/>
+                                        <circle cx="24" cy="24" r="20" stroke="#0d7377" stroke-width="4" fill="none" 
+                                                stroke-dasharray="125.6" stroke-dashoffset="0" id="timerCircle"/>
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span class="text-xs font-semibold text-gray-600" id="timerPercentage">100%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Question Navigation -->
+                    <div class="bg-white rounded-xl shadow-lg p-4 mb-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="font-semibold text-gray-800">Questions</h4>
+                            <button id="endTestBtn" class="text-red-600 hover:text-red-700 font-semibold">
+                                End Test
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-10 gap-2" id="questionNavigation">
+                            <!-- Question numbers will be generated here -->
+                        </div>
+                    </div>
+
+                    <!-- Current Question -->
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <div class="mb-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold" id="questionSubject">Physics</span>
+                                <span class="text-gray-500 text-sm" id="questionDifficulty">Medium</span>
+                            </div>
+                            <h3 class="font-display font-semibold text-xl text-gray-800 mb-4" id="questionText">
+                                Loading question...
+                            </h3>
+                        </div>
+
+                        <!-- Options -->
+                        <div class="space-y-3 mb-8" id="questionOptions">
+                            <!-- Options will be generated here -->
+                        </div>
+
+                        <!-- Navigation Buttons -->
+                        <div class="flex items-center justify-between">
+                            <button id="prevBtn" class="px-6 py-3 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
+                                Previous
+                            </button>
+                            <div class="flex space-x-3">
+                                <button id="bookmarkBtn" class="px-6 py-3 border border-yellow-400 rounded-lg font-semibold text-yellow-600 hover:bg-yellow-50 transition-colors">
+                                    Bookmark
+                                </button>
+                                <button id="nextBtn" class="px-6 py-3 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition-colors">
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Results Screen (Hidden Initially) -->
+                <div id="resultsScreen" class="hidden">
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <div class="text-center mb-8">
+                            <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-12 h-12 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <h3 class="font-display font-semibold text-3xl text-gray-800 mb-2">Test Completed!</h3>
+                            <p class="text-gray-600">Great job on completing the assessment</p>
+                        </div>
+
+                        <!-- Score Summary -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div class="text-center p-6 bg-blue-50 rounded-lg">
+                                <div class="text-3xl font-bold text-blue-600 mb-2" id="totalScore">85%</div>
+                                <div class="text-gray-600">Overall Score</div>
+                            </div>
+                            <div class="text-center p-6 bg-green-50 rounded-lg">
+                                <div class="text-3xl font-bold text-green-600 mb-2" id="correctAnswers">8/10</div>
+                                <div class="text-gray-600">Correct Answers</div>
+                            </div>
+                            <div class="text-center p-6 bg-purple-50 rounded-lg">
+                                <div class="text-3xl font-bold text-purple-600 mb-2" id="timeSpent">12:30</div>
+                                <div class="text-gray-600">Time Spent</div>
+                            </div>
+                        </div>
+
+                        <!-- Subject Breakdown -->
+                        <div class="mb-8">
+                            <h4 class="font-display font-semibold text-xl text-gray-800 mb-4">Subject Performance</h4>
+                            <div id="subjectBreakdown" class="space-y-3">
+                                <!-- Subject performance will be generated here -->
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                            <button id="reviewAnswersBtn" class="px-8 py-3 bg-teal-600 text-white rounded-lg font-semibold hover:bg-teal-700 transition-colors">
+                                Review Answers
+                            </button>
+                            <button id="retakeTestBtn" class="px-8 py-3 border border-teal-600 text-teal-600 rounded-lg font-semibold hover:bg-teal-50 transition-colors">
+                                Retake Test
+                            </button>
+                            <button id="newTestBtn" class="px-8 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors">
+                                New Test
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="font-display font-bold text-2xl mb-4">
+                    Study<span class="text-teal-400">AI</span>
+                </div>
+                <p class="text-gray-400 mb-4">
+                    Empowering students with AI-driven personalized learning experiences
+                </p>
+                <div class="text-sm text-gray-500">
+                    © 2025 StudyAI. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Assessment Center JavaScript
+        const AssessmentCenter = {
+            currentQuestion: 0,
+            totalQuestions: 10,
+            answers: {},
+            bookmarked: new Set(),
+            timeRemaining: 600, // 10 minutes in seconds
+            timer: null,
+            testGenerated: false,
+            questions: []
+        };
+
+        // Sample questions database
+        const questionDatabase = {
+            physics: {
+                easy: [
+                    {
+                        question: "What is the SI unit of force?",
+                        options: ["Newton", "Joule", "Watt", "Pascal"],
+                        correct: 0,
+                        explanation: "The Newton (N) is the SI unit of force, named after Sir Isaac Newton."
+                    },
+                    {
+                        question: "Which of the following is a vector quantity?",
+                        options: ["Mass", "Temperature", "Velocity", "Time"],
+                        correct: 2,
+                        explanation: "Velocity is a vector quantity as it has both magnitude and direction."
+                    }
+                ],
+                medium: [
+                    {
+                        question: "A car accelerates from rest to 25 m/s in 5 seconds. What is its acceleration?",
+                        options: ["5 m/s²", "125 m/s²", "20 m/s²", "30 m/s²"],
+                        correct: 0,
+                        explanation: "Acceleration = (final velocity - initial velocity) / time = (25-0)/5 = 5 m/s²"
+                    }
+                ],
+                hard: [
+                    {
+                        question: "In a projectile motion, at what angle should the projectile be launched for maximum range?",
+                        options: ["30°", "45°", "60°", "90°"],
+                        correct: 1,
+                        explanation: "For maximum range in projectile motion, the optimal launch angle is 45°."
+                    }
+                ]
+            },
+            chemistry: {
+                easy: [
+                    {
+                        question: "What is the chemical symbol for gold?",
+                        options: ["Go", "Gd", "Au", "Ag"],
+                        correct: 2,
+                        explanation: "Gold's chemical symbol is Au, from the Latin word 'aurum'."
+                    }
+                ],
+                medium: [
+                    {
+                        question: "Which type of reaction is: 2H₂ + O₂ → 2H₂O?",
+                        options: ["Decomposition", "Synthesis", "Single displacement", "Double displacement"],
+                        correct: 1,
+                        explanation: "This is a synthesis (combination) reaction where two reactants form one product."
+                    }
+                ],
+                hard: [
+                    {
+                        question: "What is the pH of a 0.001 M NaOH solution?",
+                        options: ["3", "11", "14", "1"],
+                        correct: 1,
+                        explanation: "pOH = -log(0.001) = 3, so pH = 14 - 3 = 11"
+                    }
+                ]
+            },
+            mathematics: {
+                easy: [
+                    {
+                        question: "What is the derivative of x²?",
+                        options: ["x", "2x", "x²/2", "2"],
+                        correct: 1,
+                        explanation: "Using the power rule, d/dx(x²) = 2x"
+                    }
+                ],
+                medium: [
+                    {
+                        question: "What is the integral of 1/x?",
+                        options: ["ln|x| + C", "1/x² + C", "x + C", "0"],
+                        correct: 0,
+                        explanation: "The integral of 1/x is ln|x| + C, where C is the constant of integration."
+                    }
+                ],
+                hard: [
+                    {
+                        question: "What is the limit of (sin x)/x as x approaches 0?",
+                        options: ["0", "1", "∞", "Does not exist"],
+                        correct: 1,
+                        explanation: "This is a standard limit: lim(x→0) (sin x)/x = 1"
+                    }
+                ]
+            },
+            biology: {
+                easy: [
+                    {
+                        question: "What is the powerhouse of the cell?",
+                        options: ["Nucleus", "Ribosome", "Mitochondria", "Chloroplast"],
+                        correct: 2,
+                        explanation: "Mitochondria are known as the powerhouse of the cell because they produce ATP."
+                    }
+                ],
+                medium: [
+                    {
+                        question: "Which process converts light energy into chemical energy?",
+                        options: ["Cellular respiration", "Photosynthesis", "Fermentation", "Glycolysis"],
+                        correct: 1,
+                        explanation: "Photosynthesis converts light energy into chemical energy in the form of glucose."
+                    }
+                ],
+                hard: [
+                    {
+                        question: "What is the probability of getting a recessive phenotype from two heterozygous parents?",
+                        options: ["25%", "50%", "75%", "100%"],
+                        correct: 0,
+                        explanation: "Using a Punnett square, there's a 25% chance of getting the recessive phenotype (aa)."
+                    }
+                ]
+            }
+        };
+
+        // Initialize the assessment center
+        function initializeAssessmentCenter() {
+            document.getElementById('generateTestBtn').addEventListener('click', generateTest);
+            document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+            document.getElementById('prevBtn').addEventListener('click', prevQuestion);
+            document.getElementById('bookmarkBtn').addEventListener('click', toggleBookmark);
+            document.getElementById('endTestBtn').addEventListener('click', endTest);
+            
+            // Results screen buttons
+            document.getElementById('reviewAnswersBtn').addEventListener('click', reviewAnswers);
+            document.getElementById('retakeTestBtn').addEventListener('click', retakeTest);
+            document.getElementById('newTestBtn').addEventListener('click', newTest);
+        }
+
+        // Generate test based on configuration
+        function generateTest() {
+            const examType = document.getElementById('examType').value;
+            const selectedSubjects = Array.from(document.querySelectorAll('.subject-checkbox:checked')).map(cb => cb.value);
+            const difficulty = parseInt(document.getElementById('difficulty').value);
+            const questionCount = parseInt(document.getElementById('questionCount').value);
+            const timeLimit = document.getElementById('timeLimit').value;
+
+            if (selectedSubjects.length === 0) {
+                showNotification('Please select at least one subject', 'error');
+                return;
+            }
+
+            // Show loading state
+            showTestGeneration();
+
+            // Simulate AI test generation
+            setTimeout(() => {
+                generateQuestions(selectedSubjects, difficulty, questionCount);
+                startTest(examType, questionCount, timeLimit);
+            }, 2000);
+        }
+
+        function showTestGeneration() {
+            const testGen = document.getElementById('testGeneration');
+            testGen.innerHTML = `
+                <div class="text-center">
+                    <div class="w-24 h-24 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-6 ai-loading">
+                        <svg class="w-12 h-12 text-teal-600" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-display font-semibold text-2xl text-gray-800 mb-4">AI is Generating Your Test</h3>
+                    <p class="text-gray-600 mb-6">Creating personalized questions based on your learning profile...</p>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-teal-600 h-2 rounded-full animate-pulse" style="width: 100%"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function generateQuestions(subjects, difficulty, count) {
+            const difficultyMap = { 1: 'easy', 2: 'medium', 3: 'hard' };
+            const selectedDifficulty = difficultyMap[difficulty];
+            
+            AssessmentCenter.questions = [];
+            
+            // Distribute questions across subjects
+            const questionsPerSubject = Math.floor(count / subjects.length);
+            const remainder = count % subjects.length;
+            
+            subjects.forEach((subject, index) => {
+                const subjectQuestions = questionsPerSubject + (index < remainder ? 1 : 0);
+                const availableQuestions = questionDatabase[subject][selectedDifficulty] || questionDatabase[subject]['medium'];
+                
+                for (let i = 0; i < subjectQuestions; i++) {
+                    const question = availableQuestions[i % availableQuestions.length];
+                    AssessmentCenter.questions.push({
+                        ...question,
+                        subject: subject,
+                        difficulty: selectedDifficulty,
+                        questionNumber: AssessmentCenter.questions.length + 1
+                    });
+                }
+            });
+            
+            // Shuffle questions
+            AssessmentCenter.questions = shuffleArray(AssessmentCenter.questions);
+            AssessmentCenter.totalQuestions = count;
+        }
+
+        function startTest(examType, questionCount, timeLimit) {
+            document.getElementById('testGeneration').classList.add('hidden');
+            document.getElementById('testInterface').classList.remove('hidden');
+            
+            AssessmentCenter.currentQuestion = 0;
+            AssessmentCenter.answers = {};
+            AssessmentCenter.bookmarked = new Set();
+            
+            // Set up timer
+            if (timeLimit !== 'none') {
+                const secondsPerQuestion = parseInt(timeLimit);
+                AssessmentCenter.timeRemaining = secondsPerQuestion * questionCount;
+                startTimer();
+            }
+            
+            // Initialize question navigation
+            initializeQuestionNavigation();
+            
+            // Load first question
+            loadQuestion(0);
+            
+            AssessmentCenter.testGenerated = true;
+        }
+
+        function initializeQuestionNavigation() {
+            const navigation = document.getElementById('questionNavigation');
+            navigation.innerHTML = '';
+            
+            for (let i = 0; i < AssessmentCenter.totalQuestions; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'w-8 h-8 rounded-full text-sm font-semibold transition-all';
+                btn.textContent = i + 1;
+                
+                if (i === 0) {
+                    btn.className += ' bg-teal-600 text-white';
+                } else {
+                    btn.className += ' bg-gray-200 text-gray-700 hover:bg-gray-300';
+                }
+                
+                btn.addEventListener('click', () => loadQuestion(i));
+                navigation.appendChild(btn);
+            }
+        }
+
+        function loadQuestion(index) {
+            if (index < 0 || index >= AssessmentCenter.totalQuestions) return;
+            
+            AssessmentCenter.currentQuestion = index;
+            const question = AssessmentCenter.questions[index];
+            
+            // Update question info
+            document.getElementById('questionSubject').textContent = question.subject.charAt(0).toUpperCase() + question.subject.slice(1);
+            document.getElementById('questionDifficulty').textContent = question.difficulty.charAt(0).toUpperCase() + question.difficulty.slice(1);
+            document.getElementById('questionText').textContent = question.question;
+            
+            // Update progress
+            document.getElementById('testProgress').textContent = `Question ${index + 1} of ${AssessmentCenter.totalQuestions}`;
+            
+            // Load options
+            const optionsContainer = document.getElementById('questionOptions');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, i) => {
+                const button = document.createElement('button');
+                button.className = 'option-button w-full text-left p-4 rounded-lg border border-gray-200 hover:border-teal-300 transition-all';
+                button.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-6 h-6 rounded-full border-2 border-gray-300 mr-3 flex items-center justify-center">
+                            <div class="w-3 h-3 rounded-full bg-teal-600 hidden"></div>
+                        </div>
+                        <span>${option}</span>
+                    </div>
+                `;
+                
+                button.addEventListener('click', () => selectOption(i, button));
+                optionsContainer.appendChild(button);
+                
+                // Restore previous answer
+                if (AssessmentCenter.answers[index] === i) {
+                    selectOption(i, button);
+                }
+            });
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('nextBtn').textContent = index === AssessmentCenter.totalQuestions - 1 ? 'Finish Test' : 'Next';
+            
+            // Update bookmark button
+            const bookmarkBtn = document.getElementById('bookmarkBtn');
+            if (AssessmentCenter.bookmarked.has(index)) {
+                bookmarkBtn.textContent = 'Bookmarked';
+                bookmarkBtn.classList.add('bg-yellow-100');
+            } else {
+                bookmarkBtn.textContent = 'Bookmark';
+                bookmarkBtn.classList.remove('bg-yellow-100');
+            }
+            
+            // Update question navigation
+            updateQuestionNavigation();
+        }
+
+        function selectOption(optionIndex, button) {
+            // Clear previous selections
+            document.querySelectorAll('.option-button').forEach(btn => {
+                btn.classList.remove('selected');
+                const dot = btn.querySelector('.w-3');
+                if (dot) dot.classList.add('hidden');
+            });
+            
+            // Select current option
+            button.classList.add('selected');
+            const dot = button.querySelector('.w-3');
+            if (dot) dot.classList.remove('hidden');
+            
+            // Store answer
+            AssessmentCenter.answers[AssessmentCenter.currentQuestion] = optionIndex;
+            
+            // Update navigation
+            updateQuestionNavigation();
+        }
+
+        function nextQuestion() {
+            if (AssessmentCenter.currentQuestion < AssessmentCenter.totalQuestions - 1) {
+                loadQuestion(AssessmentCenter.currentQuestion + 1);
+            } else {
+                endTest();
+            }
+        }
+
+        function prevQuestion() {
+            if (AssessmentCenter.currentQuestion > 0) {
+                loadQuestion(AssessmentCenter.currentQuestion - 1);
+            }
+        }
+
+        function toggleBookmark() {
+            const current = AssessmentCenter.currentQuestion;
+            const bookmarkBtn = document.getElementById('bookmarkBtn');
+            
+            if (AssessmentCenter.bookmarked.has(current)) {
+                AssessmentCenter.bookmarked.delete(current);
+                bookmarkBtn.textContent = 'Bookmark';
+                bookmarkBtn.classList.remove('bg-yellow-100');
+            } else {
+                AssessmentCenter.bookmarked.add(current);
+                bookmarkBtn.textContent = 'Bookmarked';
+                bookmarkBtn.classList.add('bg-yellow-100');
+            }
+            
+            updateQuestionNavigation();
+        }
+
+        function updateQuestionNavigation() {
+            const navButtons = document.querySelectorAll('#questionNavigation button');
+            navButtons.forEach((btn, index) => {
+                btn.className = 'w-8 h-8 rounded-full text-sm font-semibold transition-all';
+                
+                if (index === AssessmentCenter.currentQuestion) {
+                    btn.className += ' bg-teal-600 text-white';
+                } else if (AssessmentCenter.answers[index] !== undefined) {
+                    btn.className += ' bg-green-600 text-white';
+                } else if (AssessmentCenter.bookmarked.has(index)) {
+                    btn.className += ' bg-yellow-500 text-white';
+                } else {
+                    btn.className += ' bg-gray-200 text-gray-700 hover:bg-gray-300';
+                }
+            });
+        }
+
+        function startTimer() {
+            AssessmentCenter.timer = setInterval(() => {
+                AssessmentCenter.timeRemaining--;
+                updateTimerDisplay();
+                
+                if (AssessmentCenter.timeRemaining <= 0) {
+                    endTest();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(AssessmentCenter.timeRemaining / 60);
+            const seconds = AssessmentCenter.timeRemaining % 60;
+            const totalTime = 600; // 10 minutes
+            const percentage = (AssessmentCenter.timeRemaining / totalTime) * 100;
+            
+            document.getElementById('timer').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Update timer circle
+            const circumference = 125.6;
+            const offset = circumference - (percentage / 100) * circumference;
+            document.getElementById('timerCircle').style.strokeDashoffset = offset;
+            document.getElementById('timerPercentage').textContent = Math.round(percentage) + '%';
+        }
+
+        function endTest() {
+            if (AssessmentCenter.timer) {
+                clearInterval(AssessmentCenter.timer);
+            }
+            
+            // Calculate results
+            const results = calculateResults();
+            showResults(results);
+        }
+
+        function calculateResults() {
+            let correct = 0;
+            const subjectScores = {};
+            
+            AssessmentCenter.questions.forEach((question, index) => {
+                const userAnswer = AssessmentCenter.answers[index];
+                const subject = question.subject;
+                
+                if (!subjectScores[subject]) {
+                    subjectScores[subject] = { correct: 0, total: 0 };
+                }
+                
+                subjectScores[subject].total++;
+                
+                if (userAnswer === question.correct) {
+                    correct++;
+                    subjectScores[subject].correct++;
+                }
+            });
+            
+            const percentage = Math.round((correct / AssessmentCenter.totalQuestions) * 100);
+            
+            return {
+                totalScore: percentage,
+                correctAnswers: correct,
+                totalQuestions: AssessmentCenter.totalQuestions,
+                subjectScores: subjectScores,
+                timeSpent: 600 - AssessmentCenter.timeRemaining
+            };
+        }
+
+        function showResults(results) {
+            document.getElementById('testInterface').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+            
+            // Update score summary
+            document.getElementById('totalScore').textContent = results.totalScore + '%';
+            document.getElementById('correctAnswers').textContent = 
+                `${results.correctAnswers}/${results.totalQuestions}`;
+            
+            const minutes = Math.floor(results.timeSpent / 60);
+            const seconds = results.timeSpent % 60;
+            document.getElementById('timeSpent').textContent = 
+                `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Update subject breakdown
+            const breakdown = document.getElementById('subjectBreakdown');
+            breakdown.innerHTML = '';
+            
+            Object.entries(results.subjectScores).forEach(([subject, score]) => {
+                const percentage = Math.round((score.correct / score.total) * 100);
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-lg';
+                div.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="w-4 h-4 bg-teal-500 rounded-full mr-3"></div>
+                        <span class="font-semibold text-gray-800">${subject.charAt(0).toUpperCase() + subject.slice(1)}</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span class="text-gray-600">${score.correct}/${score.total} correct</span>
+                        <span class="font-semibold ${percentage >= 70 ? 'text-green-600' : percentage >= 50 ? 'text-yellow-600' : 'text-red-600'}">${percentage}%</span>
+                    </div>
+                `;
+                breakdown.appendChild(div);
+            });
+        }
+
+        function reviewAnswers() {
+            showNotification('Answer review feature coming soon!', 'info');
+        }
+
+        function retakeTest() {
+            location.reload();
+        }
+
+        function newTest() {
+            document.getElementById('resultsScreen').classList.add('hidden');
+            document.getElementById('testGeneration').classList.remove('hidden');
+            AssessmentCenter.testGenerated = false;
+        }
+
+        // Utility functions
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-20 right-4 p-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full`;
+            
+            const colors = {
+                success: 'bg-green-500 text-white',
+                error: 'bg-red-500 text-white',
+                warning: 'bg-yellow-500 text-black',
+                info: 'bg-blue-500 text-white'
+            };
+            
+            notification.className += ` ${colors[type]}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => document.body.removeChild(notification), 300);
+            }, 3000);
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAssessmentCenter();
+            
+            // Add smooth scrolling and animations
+            anime({
+                targets: '.card-hover',
+                translateY: [20, 0],
+                opacity: [0, 1],
+                duration: 800,
+                delay: anime.stagger(100),
+                easing: 'easeOutCubic'
+            });
+        });
+    </script>
+</body>
+</html>

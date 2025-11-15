@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup Demo Accounts - StudyAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module" crossorigin src="/assets/setupDemo-Cu3PrObj.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/auth-CEjR0vsn.js">
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-2xl w-full bg-white rounded-xl shadow-lg p-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6">Setup Demo Accounts</h1>
+
+        <div class="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-500 rounded">
+            <p class="text-yellow-900 font-semibold mb-2">⚠️ Important: Supabase Requires Manual Setup</p>
+            <p class="text-yellow-800 text-sm mb-3">Due to email confirmation requirements, you need to manually create accounts in Supabase Dashboard first.</p>
+            <div class="bg-white p-3 rounded text-sm text-gray-700">
+                <p class="font-semibold mb-2">Quick Steps:</p>
+                <ol class="list-decimal list-inside space-y-1">
+                    <li>Go to Supabase Dashboard → Authentication → Settings</li>
+                    <li>Disable "Enable email confirmations"</li>
+                    <li>Go to Authentication → Users → "Add User"</li>
+                    <li>Create: student@demo.com / demo123456 (check "Auto Confirm")</li>
+                    <li>Create: admin@demo.com / admin123456 (check "Auto Confirm")</li>
+                    <li>Then click button below to add profiles</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+            <p class="text-blue-900 font-semibold mb-2">Or use the signup form:</p>
+            <p class="text-blue-800 text-sm">After disabling email confirmation, you can create accounts directly from the login page using the "Sign Up" tab.</p>
+        </div>
+
+        <button id="setupBtn" class="w-full bg-teal-600 text-white py-4 rounded-lg font-semibold hover:bg-teal-700 text-lg mb-4">
+            Create Demo Accounts
+        </button>
+
+        <div id="progress" class="hidden mb-4">
+            <div class="space-y-2">
+                <div id="step1" class="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <div class="spinner hidden mr-3"></div>
+                    <span class="text-gray-600">Creating student account...</span>
+                </div>
+                <div id="step2" class="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <div class="spinner hidden mr-3"></div>
+                    <span class="text-gray-600">Creating admin account...</span>
+                </div>
+                <div id="step3" class="flex items-center p-3 bg-gray-50 rounded-lg">
+                    <div class="spinner hidden mr-3"></div>
+                    <span class="text-gray-600">Adding sample data...</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="success" class="hidden p-4 bg-green-50 border-l-4 border-green-500 rounded mb-4">
+            <p class="text-green-900 font-semibold mb-2">✓ Demo accounts created successfully!</p>
+            <div class="text-green-800 text-sm space-y-2 mt-3">
+                <div class="p-3 bg-white rounded">
+                    <p class="font-semibold">Student Account:</p>
+                    <p>Email: student@demo.com</p>
+                    <p>Password: demo123456</p>
+                </div>
+                <div class="p-3 bg-white rounded">
+                    <p class="font-semibold">Admin Account:</p>
+                    <p>Email: admin@demo.com</p>
+                    <p>Password: admin123456</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="error" class="hidden p-4 bg-red-50 border-l-4 border-red-500 rounded mb-4">
+            <p class="text-red-900 font-semibold mb-2">Error creating accounts</p>
+            <p id="errorMessage" class="text-red-800 text-sm"></p>
+        </div>
+
+        <a href="login.html" class="block w-full bg-gray-200 text-gray-700 py-3 rounded-lg font-semibold hover:bg-gray-300 text-center">
+            Go to Login
+        </a>
+
+        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+            <p class="text-sm text-gray-600 font-semibold mb-2">Note:</p>
+            <p class="text-sm text-gray-600">If accounts already exist, you can login directly with the credentials above.</p>
+        </div>
+    </div>
+
+    <style>
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #0D7377;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+</body>
+</html>

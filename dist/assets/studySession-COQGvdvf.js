@@ -1,0 +1,1 @@
+import"./modulepreload-polyfill-B5Qt9EMX.js";import{g as o}from"./auth-CEjR0vsn.js";import"https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";async function t(){await o()||(window.location.href="login.html")}t();
