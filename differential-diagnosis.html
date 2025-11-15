@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Differential Diagnosis</title><script src="https://cdn.tailwindcss.com"></script></head>
+<body class="bg-gray-50"><nav class="bg-white shadow-sm border-b"><div class="max-w-7xl mx-auto px-4 py-4 flex justify-between"><a href="dashboard.html" class="font-bold text-2xl text-teal-600">StudyAI</a><a href="ai-tools.html" class="text-gray-600">Back</a></div></nav>
+<div class="max-w-4xl mx-auto px-4 py-8"><div class="bg-white rounded-xl shadow p-8"><h2 class="text-2xl font-bold mb-6">Differential Diagnosis Generator</h2>
+<div class="space-y-4 mb-6"><input type="text" placeholder="Chief Complaint" class="w-full p-3 border rounded-lg">
+<input type="text" placeholder="Associated symptoms" class="w-full p-3 border rounded-lg"><input type="number" placeholder="Age" class="w-full p-3 border rounded-lg"></div>
+<button class="w-full bg-teal-600 text-white py-3 rounded-lg font-semibold">Generate DDx</button></div>
+<div class="mt-6 bg-white rounded-xl shadow p-8"><h3 class="text-xl font-bold mb-4">Differential Diagnoses: Chest Pain</h3><div class="space-y-4">
+<div class="p-4 bg-red-50 border-l-4 border-red-600"><h4 class="font-semibold text-red-900">Acute MI (Life-threatening)</h4><p class="text-sm">Crushing pain, radiation, risk factors</p></div>
+<div class="p-4 bg-orange-50 border-l-4 border-orange-600"><h4 class="font-semibold text-orange-900">Pulmonary Embolism</h4><p class="text-sm">Sudden onset, pleuritic, dyspnea</p></div>
+<div class="p-4 bg-blue-50 border-l-4 border-blue-600"><h4 class="font-semibold text-blue-900">GERD</h4><p class="text-sm">Burning pain, post-meal</p></div></div></div></div>
+<script type="module">import{getCurrentUser}from'./auth.js';async function c(){const u=await getCurrentUser();if(!u)window.location.href='login.html';}c();</script></body></html>
