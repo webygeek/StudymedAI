@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - StudyAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-teal: #0D7377;
+            --ocean-blue: #14A085;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .font-display { font-family: 'Poppins', sans-serif; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full">
+        <div class="text-center mb-8">
+            <h1 class="font-display font-bold text-4xl text-gray-800 mb-2">
+                Study<span class="text-teal-600">AI</span>
+            </h1>
+            <p class="text-gray-600">AI-Powered Education Platform</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8">
+            <div class="flex mb-6 bg-gray-100 rounded-lg p-1">
+                <button id="loginTab" class="flex-1 py-2 px-4 rounded-md font-semibold transition-colors bg-white shadow text-teal-600">
+                    Login
+                </button>
+                <button id="signupTab" class="flex-1 py-2 px-4 rounded-md font-semibold transition-colors text-gray-600 hover:text-gray-800">
+                    Sign Up
+                </button>
+            </div>
+
+            <form id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="loginEmail" required
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="loginPassword" required
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                </div>
+                <button type="submit"
+                    class="w-full bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-700 transition-colors">
+                    Login
+                </button>
+            </form>
+
+            <form id="signupForm" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                    <input type="text" id="signupName" required
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                    <input type="email" id="signupEmail" required
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                    <input type="password" id="signupPassword" required minlength="6"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">I am a</label>
+                    <select id="signupRole"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent">
+                        <option value="student">Student</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <button type="submit"
+                    class="w-full bg-teal-600 text-white py-3 rounded-lg font-semibold hover:bg-teal-700 transition-colors">
+                    Sign Up
+                </button>
+            </form>
+
+            <div id="errorMessage" class="mt-4 hidden p-3 bg-red-100 text-red-700 rounded-lg text-sm"></div>
+            <div id="successMessage" class="mt-4 hidden p-3 bg-green-100 text-green-700 rounded-lg text-sm"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { signIn, signUp, getCurrentUser, getUserProfile } from './auth.js';
+
+        const loginTab = document.getElementById('loginTab');
+        const signupTab = document.getElementById('signupTab');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        async function checkExistingSession() {
+            const user = await getCurrentUser();
+            if (user) {
+                const profile = await getUserProfile(user.id);
+                redirectUser(profile);
+            }
+        }
+
+        function redirectUser(profile) {
+            if (profile.role === 'admin') {
+                window.location.href = 'admin-dashboard.html';
+            } else if (!profile.has_completed_survey) {
+                window.location.href = 'survey.html';
+            } else {
+                window.location.href = 'dashboard.html';
+            }
+        }
+
+        loginTab.addEventListener('click', () => {
+            loginTab.classList.add('bg-white', 'shadow', 'text-teal-600');
+            loginTab.classList.remove('text-gray-600');
+            signupTab.classList.remove('bg-white', 'shadow', 'text-teal-600');
+            signupTab.classList.add('text-gray-600');
+            loginForm.classList.remove('hidden');
+            signupForm.classList.add('hidden');
+        });
+
+        signupTab.addEventListener('click', () => {
+            signupTab.classList.add('bg-white', 'shadow', 'text-teal-600');
+            signupTab.classList.remove('text-gray-600');
+            loginTab.classList.remove('bg-white', 'shadow', 'text-teal-600');
+            loginTab.classList.add('text-gray-600');
+            signupForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMessage.classList.add('hidden');
+            successMessage.classList.add('hidden');
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const { user } = await signIn(email, password);
+                const profile = await getUserProfile(user.id);
+                successMessage.textContent = 'Login successful! Redirecting...';
+                successMessage.classList.remove('hidden');
+                setTimeout(() => redirectUser(profile), 1000);
+            } catch (error) {
+                errorMessage.textContent = error.message;
+                errorMessage.classList.remove('hidden');
+            }
+        });
+
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMessage.classList.add('hidden');
+            successMessage.classList.add('hidden');
+
+            const fullName = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const role = document.getElementById('signupRole').value;
+
+            try {
+                const { user } = await signUp(email, password, fullName, role);
+                successMessage.textContent = 'Account created successfully! Redirecting...';
+                successMessage.classList.remove('hidden');
+
+                setTimeout(() => {
+                    if (role === 'student') {
+                        window.location.href = 'survey.html';
+                    } else {
+                        window.location.href = 'admin-dashboard.html';
+                    }
+                }, 1000);
+            } catch (error) {
+                errorMessage.textContent = error.message;
+                errorMessage.classList.remove('hidden');
+            }
+        });
+
+        checkExistingSession();
+    </script>
+</body>
+</html>

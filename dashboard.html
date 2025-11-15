@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyAI - AI-Powered Education Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-teal: #0D7377;
+            --ocean-blue: #14A085;
+            --warm-gray: #2C3E50;
+            --light-gray: #ECF0F1;
+            --success-green: #27AE60;
+            --warning-orange: #F39C12;
+            --error-red: #E74C3C;
+            --info-blue: #3498DB;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .font-display { font-family: 'Poppins', sans-serif; }
+        
+        .hero-bg {
+            background: linear-gradient(135deg, var(--primary-teal) 0%, var(--ocean-blue) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+            transition: all 0.3s ease;
+        }
+        
+        .progress-ring:hover {
+            transform: rotate(-90deg) scale(1.05);
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .neural-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .content-overlay {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .typing-text {
+            color: white;
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+        
+        .achievement-badge {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .study-streak {
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--ocean-blue);
+        }
+        
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--ocean-blue);
+        }
+        
+        .quick-action-btn {
+            background: linear-gradient(135deg, var(--primary-teal), var(--ocean-blue));
+            transition: all 0.3s ease;
+        }
+        
+        .quick-action-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(13, 115, 119, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white/90 backdrop-blur-md shadow-sm fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-8">
+                    <div class="font-display font-bold text-2xl text-gray-800">
+                        Study<span class="text-teal-600">AI</span>
+                    </div>
+                    <div class="hidden md:flex space-x-6">
+                        <a href="index.html" class="nav-link active text-gray-700 font-medium">Dashboard</a>
+                        <a href="assessment.html" class="nav-link text-gray-700 font-medium">Assessment</a>
+                        <a href="memory-room.html" class="nav-link text-gray-700 font-medium">Memory Room</a>
+                        <a href="ai-tools.html" class="nav-link text-gray-700 font-medium">AI Tools</a>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-sm text-gray-600">
+                        <span class="study-streak font-semibold">🔥 15 Day Streak</span>
+                    </div>
+                    <div class="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center">
+                        <span class="text-white text-sm font-semibold">A</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg pt-16 pb-12">
+        <div id="neural-network" class="neural-bg"></div>
+        <div class="content-overlay max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="text-white">
+                    <h1 class="font-display font-bold text-5xl mb-6">
+                        Master Your Exams with
+                        <span class="typing-text" id="typed-text"></span>
+                    </h1>
+                    <p class="text-xl mb-8 text-blue-100 leading-relaxed">
+                        Harness the power of artificial intelligence to create personalized study plans, 
+                        generate adaptive assessments, and track your progress with precision.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button class="quick-action-btn text-white px-8 py-3 rounded-lg font-semibold">
+                            Start Studying
+                        </button>
+                        <button class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-teal-600 transition-all">
+                            Take Assessment
+                        </button>
+                    </div>
+                </div>
+                <div class="relative">
+                    <img src="hero-studyai.png" alt="AI Study Platform" class="w-full h-auto rounded-lg shadow-2xl">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Progress Overview -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="font-display font-bold text-3xl text-gray-800 mb-4">Your Progress Overview</h2>
+                <p class="text-gray-600 text-lg">Track your journey to exam success</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <!-- Physics Progress -->
+                <div class="card-hover bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-gray-800">Physics</h3>
+                        <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                    </div>
+                    <div class="flex items-center justify-center mb-4">
+                        <svg class="progress-ring w-24 h-24" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="50" stroke="#e5e7eb" stroke-width="8" fill="none"/>
+                            <circle cx="60" cy="60" r="50" stroke="#3b82f6" stroke-width="8" fill="none" 
+                                    stroke-dasharray="314" stroke-dashoffset="94" class="transition-all duration-1000"/>
+                        </svg>
+                        <div class="absolute text-2xl font-bold text-blue-600">70%</div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">28/40 Topics</p>
+                        <p class="text-xs text-gray-500 mt-1">Last studied: Today</p>
+                    </div>
+                </div>
+
+                <!-- Chemistry Progress -->
+                <div class="card-hover bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-gray-800">Chemistry</h3>
+                        <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                    </div>
+                    <div class="flex items-center justify-center mb-4">
+                        <svg class="progress-ring w-24 h-24" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="50" stroke="#e5e7eb" stroke-width="8" fill="none"/>
+                            <circle cx="60" cy="60" r="50" stroke="#10b981" stroke-width="8" fill="none" 
+                                    stroke-dasharray="314" stroke-dashoffset="63" class="transition-all duration-1000"/>
+                        </svg>
+                        <div class="absolute text-2xl font-bold text-green-600">80%</div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">32/40 Topics</p>
+                        <p class="text-xs text-gray-500 mt-1">Last studied: Yesterday</p>
+                    </div>
+                </div>
+
+                <!-- Mathematics Progress -->
+                <div class="card-hover bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-gray-800">Mathematics</h3>
+                        <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                    </div>
+                    <div class="flex items-center justify-center mb-4">
+                        <svg class="progress-ring w-24 h-24" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="50" stroke="#e5e7eb" stroke-width="8" fill="none"/>
+                            <circle cx="60" cy="60" r="50" stroke="#ef4444" stroke-width="8" fill="none" 
+                                    stroke-dasharray="314" stroke-dashoffset="125" class="transition-all duration-1000"/>
+                        </svg>
+                        <div class="absolute text-2xl font-bold text-red-600">60%</div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">24/40 Topics</p>
+                        <p class="text-xs text-gray-500 mt-1">Last studied: 2 days ago</p>
+                    </div>
+                </div>
+
+                <!-- Biology Progress -->
+                <div class="card-hover bg-white rounded-xl p-6 shadow-lg border border-gray-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold text-gray-800">Biology</h3>
+                        <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                    </div>
+                    <div class="flex items-center justify-center mb-4">
+                        <svg class="progress-ring w-24 h-24" viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="50" stroke="#e5e7eb" stroke-width="8" fill="none"/>
+                            <circle cx="60" cy="60" r="50" stroke="#8b5cf6" stroke-width="8" fill="none" 
+                                    stroke-dasharray="314" stroke-dashoffset="31" class="transition-all duration-1000"/>
+                        </svg>
+                        <div class="absolute text-2xl font-bold text-purple-600">90%</div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-gray-600">36/40 Topics</p>
+                        <p class="text-xs text-gray-500 mt-1">Last studied: Today</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Today's Schedule -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Study Schedule -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="font-display font-semibold text-xl text-gray-800">Today's Study Schedule</h3>
+                            <span class="text-sm text-gray-500">Nov 15, 2025</span>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <!-- Completed Session -->
+                            <div class="flex items-center p-4 bg-green-50 rounded-lg border-l-4 border-green-500">
+                                <div class="flex-shrink-0 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <h4 class="font-semibold text-gray-800">Physics - Mechanics</h4>
+                                    <p class="text-sm text-gray-600">9:00 AM - 10:30 AM • 90 minutes</p>
+                                </div>
+                                <div class="text-green-600 font-semibold">Completed</div>
+                            </div>
+
+                            <!-- Current Session -->
+                            <div class="flex items-center p-4 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                                <div class="flex-shrink-0 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <div class="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <h4 class="font-semibold text-gray-800">Chemistry - Organic Reactions</h4>
+                                    <p class="text-sm text-gray-600">11:00 AM - 12:30 PM • 90 minutes</p>
+                                </div>
+                                <div class="text-blue-600 font-semibold">In Progress</div>
+                            </div>
+
+                            <!-- Upcoming Session -->
+                            <div class="flex items-center p-4 bg-gray-50 rounded-lg border-l-4 border-gray-300">
+                                <div class="flex-shrink-0 w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <h4 class="font-semibold text-gray-800">Mathematics - Calculus</h4>
+                                    <p class="text-sm text-gray-600">2:00 PM - 3:30 PM • 90 minutes</p>
+                                </div>
+                                <div class="text-gray-500 font-semibold">Upcoming</div>
+                            </div>
+
+                            <!-- Evening Session -->
+                            <div class="flex items-center p-4 bg-gray-50 rounded-lg border-l-4 border-gray-300">
+                                <div class="flex-shrink-0 w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="ml-4 flex-1">
+                                    <h4 class="font-semibold text-gray-800">Biology - Genetics</h4>
+                                    <p class="text-sm text-gray-600">7:00 PM - 8:30 PM • 90 minutes</p>
+                                </div>
+                                <div class="text-gray-500 font-semibold">Upcoming</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions & Stats -->
+                <div class="space-y-6">
+                    <!-- Quick Actions -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="font-display font-semibold text-xl text-gray-800 mb-4">Quick Actions</h3>
+                        <div class="space-y-3">
+                            <button class="w-full bg-teal-600 text-white p-3 rounded-lg font-semibold hover:bg-teal-700 transition-colors">
+                                Start Study Session
+                            </button>
+                            <button class="w-full bg-blue-600 text-white p-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                                Generate AI Test
+                            </button>
+                            <button class="w-full bg-purple-600 text-white p-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                                Review Memory Room
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Study Stats -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="font-display font-semibold text-xl text-gray-800 mb-4">Study Stats</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Study Streak</span>
+                                <span class="study-streak font-bold text-lg">15 days</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Total Hours</span>
+                                <span class="font-bold text-lg">247 hours</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Tests Completed</span>
+                                <span class="font-bold text-lg">42 tests</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Average Score</span>
+                                <span class="font-bold text-lg text-green-600">78%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Achievements -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="font-display font-semibold text-xl text-gray-800 mb-4">Recent Achievements</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center achievement-badge">
+                                <div class="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white text-sm">🏆</span>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="font-semibold text-gray-800">Week Warrior</p>
+                                    <p class="text-xs text-gray-500">7-day study streak</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white text-sm">🎯</span>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="font-semibold text-gray-800">Goal Crusher</p>
+                                    <p class="text-xs text-gray-500">Completed weekly target</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                    <span class="text-white text-sm">📚</span>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="font-semibold text-gray-800">Knowledge Seeker</p>
+                                    <p class="text-xs text-gray-500">100 topics completed</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Performance Analytics -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="font-display font-bold text-3xl text-gray-800 mb-4">Performance Analytics</h2>
+                <p class="text-gray-600 text-lg">AI-powered insights into your learning patterns</p>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Progress Chart -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="font-display font-semibold text-xl text-gray-800 mb-6">Weekly Progress</h3>
+                    <div id="progress-chart" style="height: 300px;"></div>
+                </div>
+
+                <!-- Subject Performance -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="font-display font-semibold text-xl text-gray-800 mb-6">Subject Performance</h3>
+                    <div id="subject-chart" style="height: 300px;"></div>
+                </div>
+            </div>
+
+            <!-- AI Insights -->
+            <div class="mt-12 bg-gradient-to-r from-teal-50 to-blue-50 rounded-xl p-8">
+                <div class="flex items-start space-x-4">
+                    <div class="w-12 h-12 bg-teal-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="font-display font-semibold text-xl text-gray-800 mb-2">AI Study Recommendation</h3>
+                        <p class="text-gray-700 mb-4">
+                            Based on your recent performance, we recommend focusing on Mathematics - Calculus. 
+                            Your current mastery is at 60%, and strengthening this area could improve your overall score by 8-12%.
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="bg-teal-100 text-teal-800 px-3 py-1 rounded-full text-sm">Focus Area: Calculus</span>
+                            <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">Recommended: 3 sessions/week</span>
+                            <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">Potential Gain: +8%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="font-display font-bold text-2xl mb-4">
+                    Study<span class="text-teal-400">AI</span>
+                </div>
+                <p class="text-gray-400 mb-4">
+                    Empowering students with AI-driven personalized learning experiences
+                </p>
+                <div class="text-sm text-gray-500">
+                    © 2025 StudyAI. All rights reserved.
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
